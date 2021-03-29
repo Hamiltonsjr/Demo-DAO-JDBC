@@ -10,7 +10,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SellerDaoJDBC implements SellerDao {
 
@@ -95,5 +98,52 @@ public class SellerDaoJDBC implements SellerDao {
     @Override
     public List<Seller> findAll() {
         return null;
+    }
+
+    @Override
+    public List<Seller> findByDepartment(Department department) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = connection.prepareStatement("SELECT seller.*,department.Name as DepName\n" +
+                    "FROM seller INNER JOIN department\n" +
+                    "ON seller.DepartmentId = department.Id\n" +
+                    "WHERE DepartmentId = ?\n" +
+                    "ORDER BY Name");
+
+            preparedStatement.setInt(1,department.getId());
+            resultSet = preparedStatement.executeQuery();
+            List<Seller> list = new ArrayList<>();
+            Map<Integer, Department> map = new HashMap<>();
+
+            // while para percorrer o resultSet até obter um próximo.
+            while (resultSet.next()){
+                // Testanto se o departamento já existe.
+                Department dep  = map.get(resultSet.getInt("DepartmentId"));
+
+                if(dep == null){
+                    dep = instantiateDepartment(resultSet);
+                    map.put(resultSet.getInt("DepartmentId"), dep);
+                }
+
+                Seller seller = instantiateSeller(resultSet, dep);
+                list.add(seller);
+
+            }
+            return list;
+
+        }
+        catch (SQLException sqlException){
+            throw new DbException(sqlException.getMessage());
+
+        }
+        finally {
+            DB.closeStatement(preparedStatement);
+            DB.closeResult(resultSet);
+
+        }
+
+
     }
 }
