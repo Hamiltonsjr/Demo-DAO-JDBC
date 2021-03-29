@@ -6,14 +6,9 @@ import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class SellerDaoJDBC implements SellerDao {
 
@@ -26,7 +21,43 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public void insert(Seller seller) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
+        try {
+            preparedStatement = connection.prepareStatement("INSERT INTO seller\n" +
+                    "(Name, Email, BirthDate, BaseSalary, DepartmentId)\n" +
+                    "VALUES\n" +
+                    "(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+            preparedStatement.setString(1, seller.getName());
+            preparedStatement.setString(2,seller.getEmail());
+            preparedStatement.setDate(3,new java.sql.Date(seller.getBirthDate().getTime()));
+            preparedStatement.setDouble(4,seller.getBaseSalary());
+            preparedStatement.setInt(5,seller.getDepartment().getId());
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if(rowsAffected > 0){
+                ResultSet resultSet1 = preparedStatement.getGeneratedKeys();
+                if (resultSet1.next()){
+                    int id = resultSet1.getInt(1);
+                    seller.setId(id);
+                }
+                DB.closeResult(resultSet1);
+            }
+            else {
+                throw new DbException("Unexpected error! No rows affected!");
+            }
+            
+        }
+        catch (SQLException sqlException){
+            throw new DbException(sqlException.getMessage());
+        }
+        finally {
+            DB.closeStatement(preparedStatement);
+        }
     }
 
     @Override
