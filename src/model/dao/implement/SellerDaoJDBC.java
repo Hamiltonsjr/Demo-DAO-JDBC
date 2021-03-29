@@ -16,7 +16,6 @@ public class SellerDaoJDBC implements SellerDao {
 
     public SellerDaoJDBC(Connection connection){
         this.connection = connection;
-
     }
 
     @Override
@@ -50,7 +49,6 @@ public class SellerDaoJDBC implements SellerDao {
             else {
                 throw new DbException("Unexpected error! No rows affected!");
             }
-
         }
         catch (SQLException sqlException){
             throw new DbException(sqlException.getMessage());
@@ -76,15 +74,12 @@ public class SellerDaoJDBC implements SellerDao {
             preparedStatement.setInt(6,seller.getId());
 
             preparedStatement.executeUpdate();
-
         }
         catch (SQLException sqlException){
             throw new DbException(sqlException.getMessage());
-
         }
         finally {
             DB.closeStatement(preparedStatement);
-
         }
     }
 
@@ -162,7 +157,6 @@ public class SellerDaoJDBC implements SellerDao {
         department.setId(resultSet.getInt("DepartmentId"));
         department.setName(resultSet.getString("DepName"));
         return department;
-
     }
 
     @Override
@@ -232,21 +226,15 @@ public class SellerDaoJDBC implements SellerDao {
 
                 Seller seller = instantiateSeller(resultSet, dep);
                 list.add(seller);
-
             }
             return list;
-
         }
         catch (SQLException sqlException){
             throw new DbException(sqlException.getMessage());
-
         }
         finally {
             DB.closeStatement(preparedStatement);
             DB.closeResult(resultSet);
-
         }
-
-
     }
 }
