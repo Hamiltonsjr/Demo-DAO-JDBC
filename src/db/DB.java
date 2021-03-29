@@ -25,7 +25,7 @@ public class DB {
         }
         return connection;
     }
-    
+
 
   public static void closeConnection(){
         if (connection != null){
